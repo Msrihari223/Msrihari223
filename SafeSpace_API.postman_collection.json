@@ -1,0 +1,151 @@
+{
+  "info": {
+    "name": "SafeSpace API",
+    "_postman_id": "safespace-collection",
+    "description": "Cyberbullying Detection REST API — all endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000" }
+  ],
+  "item": [
+
+    {
+      "name": "1. Health Check",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/health",
+        "description": "Check if server is running and model is loaded"
+      }
+    },
+
+    {
+      "name": "2. Predict — SAFE message",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/predict",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Great project today! You explained it really well.\",\n  \"platform\": \"Instagram\"\n}"
+        }
+      }
+    },
+
+    {
+      "name": "3. Predict — WARNING message",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/predict",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"nobody cares about you, you are so annoying and weird\",\n  \"platform\": \"WhatsApp\"\n}"
+        }
+      }
+    },
+
+    {
+      "name": "4. Predict — DANGER message",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/predict",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"I know where you live. You are worthless and I will find you.\",\n  \"platform\": \"Discord\"\n}"
+        }
+      }
+    },
+
+    {
+      "name": "5. Batch Predict",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/batch",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"messages\": [\n    \"Great job on the assignment!\",\n    \"You are so dumb and ugly\",\n    \"Nobody wants you here, just leave\",\n    \"See you at the library tomorrow!\"\n  ]\n}"
+        }
+      }
+    },
+
+    {
+      "name": "6. Get All Alerts",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/alerts",
+        "description": "Returns moderator alert feed"
+      }
+    },
+
+    {
+      "name": "7. Get New Alerts Only",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/alerts?status=new",
+          "query": [{ "key": "status", "value": "new" }]
+        }
+      }
+    },
+
+    {
+      "name": "8. Get Alert Stats (Dashboard)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/alerts/stats"
+      }
+    },
+
+    {
+      "name": "9. Update Alert Status",
+      "request": {
+        "method": "PUT",
+        "url": "{{base_url}}/api/alerts/1",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"resolved\"\n}"
+        },
+        "description": "Change status to: reviewing | resolved"
+      }
+    },
+
+    {
+      "name": "10. Submit Anonymous Report",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/reports/submit",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"report_type\": \"Harassment / Bullying\",\n  \"platform\": \"Instagram\",\n  \"description\": \"A classmate keeps commenting mean things on all my posts and telling others to ignore me.\"\n}"
+        }
+      }
+    },
+
+    {
+      "name": "11. Get All Reports",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/reports"
+      }
+    },
+
+    {
+      "name": "12. Update Report Status",
+      "request": {
+        "method": "PUT",
+        "url": "{{base_url}}/api/reports/1",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"reviewed\"\n}"
+        }
+      }
+    }
+
+  ]
+}

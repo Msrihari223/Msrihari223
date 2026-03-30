@@ -1,150 +1,647 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Nebula Striker — Space Shooting Game</title>
-    <meta name="description"
-        content="A thrilling browser-based space shooting game with multiple levels, enemy types, and power-ups.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeSpace — Cyberbullying Detector</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05080f;
+    --surface: #0d1117;
+    --surface2: #161b22;
+    --border: #30363d;
+    --accent: #00d9a6;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --safe: #10b981;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --text3: #6e7681;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  body::before {
+    content:'';
+    position:fixed;inset:0;
+    background-image:
+      linear-gradient(rgba(0,217,166,0.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,217,166,0.03) 1px,transparent 1px);
+    background-size:40px 40px;
+    pointer-events:none;z-index:0;
+  }
+
+  .container { max-width: 720px; width: 100%; position: relative; z-index: 1; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 40px; }
+  .logo { display:inline-flex;align-items:center;gap:12px;margin-bottom:16px; }
+  .logo-icon {
+    width:48px;height:48px;
+    background:linear-gradient(135deg,var(--accent),#7c3aed);
+    border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;
+  }
+  .logo-text { font-family:'Space Mono',monospace;font-size:24px;font-weight:700; }
+  .logo-text span { color:var(--accent); }
+  .header p { color:var(--text2);font-size:15px;line-height:1.6; }
+  .api-status {
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(0,217,166,0.08);
+    border:1px solid rgba(0,217,166,0.2);
+    border-radius:20px;padding:5px 14px;
+    font-size:12px;color:var(--accent);
+    font-family:'Space Mono',monospace;
+    margin-top:14px;
+    cursor:pointer;
+  }
+  .dot { width:8px;height:8px;border-radius:50%; }
+  .dot.green { background:var(--safe);box-shadow:0 0 6px var(--safe);animation:pulse 2s infinite; }
+  .dot.red { background:var(--danger); }
+  .dot.yellow { background:var(--warn);animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+
+  /* Card */
+  .card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:28px;
+    margin-bottom:20px;
+  }
+  .card-label {
+    font-family:'Space Mono',monospace;
+    font-size:11px;color:var(--text3);
+    text-transform:uppercase;letter-spacing:1.5px;
+    margin-bottom:14px;
+  }
+
+  /* Platform chips */
+  .platforms { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px; }
+  .chip {
+    padding:6px 14px;border-radius:20px;
+    border:1px solid var(--border);font-size:12px;
+    cursor:pointer;transition:all 0.15s;color:var(--text2);
+  }
+  .chip:hover { border-color:var(--accent);color:var(--text); }
+  .chip.active { border-color:var(--accent);background:rgba(0,217,166,0.1);color:var(--accent); }
+
+  /* Textarea */
+  textarea {
+    width:100%;min-height:130px;
+    background:var(--surface2);
+    border:1px solid var(--border);border-radius:10px;
+    padding:14px;color:var(--text);
+    font-family:'Sora',sans-serif;font-size:14px;
+    resize:vertical;outline:none;line-height:1.6;
+    transition:border-color 0.2s;
+  }
+  textarea:focus { border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,217,166,0.1); }
+  textarea::placeholder { color:var(--text3); }
+
+  .input-footer { display:flex;justify-content:space-between;align-items:center;margin-top:8px; }
+  .char-count { font-size:11px;color:var(--text3);font-family:'Space Mono',monospace; }
+
+  /* Examples */
+  .examples { display:flex;gap:6px;flex-wrap:wrap;margin:14px 0; }
+  .ex-btn {
+    padding:5px 11px;border-radius:6px;
+    font-size:11px;font-family:'Space Mono',monospace;
+    cursor:pointer;border:1px solid var(--border);
+    background:var(--surface2);color:var(--text2);transition:all 0.15s;
+  }
+  .ex-btn:hover { color:var(--text);border-color:var(--text3); }
+  .ex-btn.warn { border-color:rgba(245,158,11,0.4);color:var(--warn); }
+  .ex-btn.danger { border-color:rgba(239,68,68,0.4);color:var(--danger); }
+
+  /* Submit button */
+  .btn-submit {
+    width:100%;padding:14px;margin-top:14px;
+    background:linear-gradient(135deg,var(--accent),#00b894);
+    border:none;border-radius:10px;
+    color:#000;font-family:'Space Mono',monospace;
+    font-size:14px;font-weight:700;
+    cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;
+  }
+  .btn-submit:hover:not(:disabled) { transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,217,166,0.3); }
+  .btn-submit:disabled { opacity:0.5;cursor:not-allowed; }
+
+  /* Result box */
+  .result-box {
+    background:var(--surface2);
+    border:1px solid var(--border);border-radius:10px;
+    padding:20px;min-height:80px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .placeholder { color:var(--text3);font-size:13px;text-align:center; }
+
+  /* Verdict */
+  .verdict {
+    width:100%;display:flex;
+    align-items:flex-start;gap:14px;
+    padding:16px;border-radius:10px;
+    animation:slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+  .verdict.safe { background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25); }
+  .verdict.warning { background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25); }
+  .verdict.danger { background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25); }
+  .verdict-icon { font-size:30px;flex-shrink:0; }
+  .verdict-body { flex:1; }
+  .verdict-title { font-size:18px;font-weight:700;line-height:1; }
+  .safe .verdict-title { color:var(--safe); }
+  .warning .verdict-title { color:var(--warn); }
+  .danger .verdict-title { color:var(--danger); }
+  .verdict-conf {
+    font-family:'Space Mono',monospace;font-size:12px;
+    color:var(--text2);margin-top:4px;
+  }
+  .verdict-action {
+    margin-top:10px;padding:10px;
+    background:rgba(255,255,255,0.04);border-radius:8px;
+    font-size:13px;color:var(--text2);line-height:1.5;
+  }
+
+  /* Categories */
+  .cats { display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0; }
+  .cat {
+    padding:3px 10px;border-radius:6px;
+    font-size:11px;font-family:'Space Mono',monospace;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.5px;
+  }
+  .cat-danger { background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.25); }
+  .cat-warn { background:rgba(245,158,11,0.12);color:#fcd34d;border:1px solid rgba(245,158,11,0.25); }
+  .cat-safe { background:rgba(16,185,129,0.12);color:#6ee7b7;border:1px solid rgba(16,185,129,0.25); }
+
+  /* Score bars */
+  .scores { margin-top:16px; }
+  .score-row { display:flex;align-items:center;gap:10px;margin-bottom:10px; }
+  .score-label { width:130px;font-size:12px;color:var(--text2);flex-shrink:0; }
+  .score-bar { flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden; }
+  .score-fill { height:100%;border-radius:3px;transition:width 0.7s ease; }
+  .score-val { width:36px;text-align:right;font-family:'Space Mono',monospace;font-size:12px;color:var(--text2); }
+
+  /* Action buttons */
+  .action-btns { display:flex;gap:8px;margin-top:14px;flex-wrap:wrap; }
+  .abtn {
+    padding:8px 16px;border-radius:8px;font-size:12px;
+    font-family:'Space Mono',monospace;font-weight:700;
+    cursor:pointer;border:none;transition:all 0.15s;
+  }
+  .abtn-red { background:rgba(239,68,68,0.12);color:var(--danger);border:1px solid rgba(239,68,68,0.3); }
+  .abtn-red:hover { background:rgba(239,68,68,0.22); }
+  .abtn-yellow { background:rgba(245,158,11,0.12);color:var(--warn);border:1px solid rgba(245,158,11,0.3); }
+  .abtn-yellow:hover { background:rgba(245,158,11,0.22); }
+  .abtn-gray { background:var(--surface2);color:var(--text2);border:1px solid var(--border); }
+  .abtn-gray:hover { color:var(--text); }
+
+  /* Error box */
+  .error-box {
+    width:100%;padding:14px;border-radius:10px;
+    background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);
+    color:#fca5a5;font-size:13px;text-align:center;
+  }
+
+  /* Loading */
+  .loading { display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 0; }
+  .spinner { width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .loading-text { font-family:'Space Mono',monospace;font-size:12px;color:var(--accent); }
+
+  /* Batch tab */
+  .tabs { display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:20px; }
+  .tab { flex:1;padding:9px;text-align:center;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.2s;font-family:'Space Mono',monospace; }
+  .tab.active { background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3); }
+
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+
+  /* Toast */
+  .toast {
+    position:fixed;bottom:24px;right:24px;
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:12px 18px;font-size:13px;z-index:999;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    transform:translateY(80px);opacity:0;
+    transition:all 0.3s ease;max-width:300px;
+  }
+  .toast.show { transform:translateY(0);opacity:1; }
+  .toast.s { border-left:3px solid var(--safe); }
+  .toast.w { border-left:3px solid var(--warn); }
+  .toast.e { border-left:3px solid var(--danger); }
+
+  /* API Docs section */
+  .code-block {
+    background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+    padding:14px;font-family:'Space Mono',monospace;
+    font-size:12px;color:#c9d1d9;line-height:1.7;
+    overflow-x:auto;margin-bottom:12px;
+  }
+  .code-block .key { color:#79c0ff; }
+  .code-block .val { color:#a5d6ff; }
+  .code-block .str { color:#a8ff78; }
+  .code-block .comment { color:var(--text3); }
+  .endpoint-badge {
+    display:inline-block;
+    padding:3px 10px;border-radius:6px;
+    font-family:'Space Mono',monospace;font-size:12px;
+    font-weight:700;margin-right:8px;
+  }
+  .get { background:rgba(16,185,129,0.15);color:var(--safe); }
+  .post { background:rgba(124,58,237,0.15);color:#c4b5fd; }
+</style>
 </head>
-
 <body>
-    <!-- Game Canvas -->
-    <canvas id="gameCanvas"></canvas>
+<div class="container">
 
-    <!-- HUD Overlay -->
-    <div id="hud" class="hidden">
-        <div id="hud-left">
-            <div class="hud-item" id="score-display">
-                <span class="hud-label">SCORE</span>
-                <span class="hud-value" id="score-value">0</span>
-            </div>
-            <div class="hud-item" id="level-display">
-                <span class="hud-label">LEVEL</span>
-                <span class="hud-value" id="level-value">1</span>
-            </div>
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🛡️</div>
+      <div class="logo-text">Safe<span>Space</span></div>
+    </div>
+    <p>NLP-based Cyberbullying Detection — Paste a message to analyze it using the ML model.</p>
+    <div class="api-status" onclick="checkHealth()" title="Click to recheck API status">
+      <div class="dot yellow" id="statusDot"></div>
+      <span id="statusText">Connecting to API...</span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('single',this)">🔍 Single Analyze</div>
+    <div class="tab" onclick="switchTab('batch',this)">📋 Batch Analyze</div>
+    <div class="tab" onclick="switchTab('docs',this)">📡 API Docs</div>
+  </div>
+
+  <!-- SINGLE ANALYZE -->
+  <div class="tab-content active" id="tab-single">
+    <div class="card">
+      <div class="card-label">Platform</div>
+      <div class="platforms">
+        <div class="chip active" onclick="selectChip(this)">📸 Instagram</div>
+        <div class="chip" onclick="selectChip(this)">🐦 Twitter/X</div>
+        <div class="chip" onclick="selectChip(this)">💬 WhatsApp</div>
+        <div class="chip" onclick="selectChip(this)">🎮 Discord</div>
+        <div class="chip" onclick="selectChip(this)">👻 Snapchat</div>
+      </div>
+
+      <div class="card-label">Message</div>
+      <textarea id="msgInput" maxlength="2000"
+        placeholder="Paste a comment, message, or social media post to analyze..."
+        oninput="updateCount()"></textarea>
+      <div class="input-footer">
+        <span class="char-count" id="charCount">0 / 2000</span>
+        <span style="font-size:11px;color:var(--text3)">Connected to Flask API</span>
+      </div>
+
+      <!-- Examples -->
+      <div style="margin-top:14px">
+        <div class="card-label" style="margin-bottom:8px">Quick Examples</div>
+        <div class="examples">
+          <button class="ex-btn" onclick="loadEx(0)">✅ Safe</button>
+          <button class="ex-btn" onclick="loadEx(1)">💬 Mild</button>
+          <button class="ex-btn warn" onclick="loadEx(2)">⚠️ Harassment</button>
+          <button class="ex-btn danger" onclick="loadEx(3)">🚨 Severe Threat</button>
         </div>
-        <div id="hud-center">
-            <div id="health-container">
-                <span class="hud-label">SHIELD</span>
-                <div id="health-bar-outer">
-                    <div id="health-bar-inner"></div>
-                    <span id="health-text">100%</span>
-                </div>
-            </div>
-        </div>
-        <div id="hud-right">
-            <div class="hud-item" id="enemies-display">
-                <span class="hud-label">ENEMIES</span>
-                <span class="hud-value" id="enemies-value">0</span>
-            </div>
-            <div class="hud-item" id="powerup-display" class="hidden">
-                <span class="hud-label">POWER-UP</span>
-                <span class="hud-value" id="powerup-value">—</span>
-            </div>
-        </div>
+      </div>
+
+      <button class="btn-submit" id="submitBtn" onclick="analyze()">
+        🔍 ANALYZE MESSAGE
+      </button>
     </div>
 
-    <!-- Start Screen -->
-    <div id="start-screen" class="screen">
-        <div class="screen-content">
-            <h1 class="game-title">NEBULA<br><span class="title-accent">STRIKER</span></h1>
-            <p class="game-subtitle">Defend the galaxy from alien invasion</p>
-            <div class="instructions">
-                <div class="instruction-item">
-                    <span class="key">MOUSE / TOUCH</span>
-                    <span>Move ship</span>
-                </div>
-                <div class="instruction-item">
-                    <span class="key">CLICK / TAP</span>
-                    <span>Shoot</span>
-                </div>
-                <div class="instruction-item">
-                    <span class="key">DESTROY</span>
-                    <span>All enemies to advance</span>
-                </div>
-            </div>
-            <button id="start-btn" class="btn btn-primary">
-                <span>LAUNCH MISSION</span>
-                <div class="btn-glow"></div>
-            </button>
-            <button id="leaderboard-btn" class="btn btn-secondary">LEADERBOARD</button>
+    <!-- Result -->
+    <div class="card">
+      <div class="card-label">Analysis Result</div>
+      <div class="result-box" id="resultBox">
+        <div class="placeholder">🛡️ Enter a message above and click Analyze</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BATCH ANALYZE -->
+  <div class="tab-content" id="tab-batch">
+    <div class="card">
+      <div class="card-label">Batch Messages (one per line, max 50)</div>
+      <textarea id="batchInput" style="min-height:180px"
+        placeholder="Enter one message per line:&#10;Great project today!&#10;You're so stupid&#10;Nobody likes you..."></textarea>
+      <button class="btn-submit" onclick="batchAnalyze()" style="margin-top:14px">📋 ANALYZE ALL MESSAGES</button>
+    </div>
+    <div class="card" id="batchResults" style="display:none">
+      <div class="card-label">Batch Results</div>
+      <div id="batchOutput"></div>
+    </div>
+  </div>
+
+  <!-- API DOCS -->
+  <div class="tab-content" id="tab-docs">
+    <div class="card">
+      <div class="card-label">REST API Endpoints</div>
+
+      <p style="font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.6">
+        Your Flask server runs on <strong style="color:var(--accent);font-family:'Space Mono',monospace">http://localhost:5000</strong>.
+        Test with Postman or use the JavaScript Fetch API below.
+      </p>
+
+      <!-- Health -->
+      <div style="margin-bottom:20px">
+        <div style="margin-bottom:8px;font-size:13px;font-weight:600">
+          <span class="endpoint-badge get">GET</span>/api/health
         </div>
-    </div>
+        <div class="code-block">
+<span class="comment">// Response</span>
+{
+  <span class="key">"status"</span>:    <span class="str">"online"</span>,
+  <span class="key">"model"</span>:     <span class="str">"loaded"</span> <span class="comment">| "demo_mode"</span>,
+  <span class="key">"endpoints"</span>: [<span class="str">"/api/predict"</span>, <span class="str">"/api/batch"</span>]
+}</div>
+      </div>
 
-    <!-- Level Intro Screen -->
-    <div id="level-screen" class="screen hidden">
-        <div class="screen-content">
-            <h2 class="level-title" id="level-title">LEVEL 1</h2>
-            <p class="level-subtitle" id="level-subtitle">Incoming hostiles detected</p>
+      <!-- Predict -->
+      <div style="margin-bottom:20px">
+        <div style="margin-bottom:8px;font-size:13px;font-weight:600">
+          <span class="endpoint-badge post">POST</span>/api/predict
         </div>
-    </div>
+        <div class="code-block">
+<span class="comment">// Request Body (JSON)</span>
+{
+  <span class="key">"text"</span>:     <span class="str">"message to analyze"</span>,
+  <span class="key">"platform"</span>: <span class="str">"Instagram"</span>
+}
 
-    <!-- Game Over Screen -->
-    <div id="gameover-screen" class="screen hidden">
-        <div class="screen-content">
-            <h2 class="gameover-title">MISSION<br><span class="title-accent">FAILED</span></h2>
-            <div class="final-stats">
-                <div class="stat">
-                    <span class="stat-label">Final Score</span>
-                    <span class="stat-value" id="final-score">0</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-label">Level Reached</span>
-                    <span class="stat-value" id="final-level">1</span>
-                </div>
-            </div>
-            <input type="text" id="player-name" class="name-input" placeholder="Enter your callsign" maxlength="12">
-            <button id="save-score-btn" class="btn btn-secondary">SAVE SCORE</button>
-            <button id="restart-btn" class="btn btn-primary">
-                <span>RETRY MISSION</span>
-                <div class="btn-glow"></div>
-            </button>
+<span class="comment">// Response</span>
+{
+  <span class="key">"label"</span>:          <span class="str">"SAFE"</span> <span class="comment">| "WARNING" | "DANGER"</span>,
+  <span class="key">"confidence"</span>:     <span class="val">0.91</span>,
+  <span class="key">"confidence_pct"</span>: <span class="str">"91%"</span>,
+  <span class="key">"categories"</span>:    [<span class="str">"Harassment"</span>],
+  <span class="key">"action"</span>:         <span class="str">"Alert moderator..."</span>,
+  <span class="key">"source"</span>:         <span class="str">"model"</span> <span class="comment">| "demo"</span>
+}</div>
+      </div>
+
+      <!-- Batch -->
+      <div style="margin-bottom:20px">
+        <div style="margin-bottom:8px;font-size:13px;font-weight:600">
+          <span class="endpoint-badge post">POST</span>/api/batch
         </div>
-    </div>
+        <div class="code-block">
+<span class="comment">// Request Body (JSON)</span>
+{
+  <span class="key">"messages"</span>: [<span class="str">"msg1"</span>, <span class="str">"msg2"</span>, <span class="str">"msg3"</span>]
+}
 
-    <!-- Win Screen -->
-    <div id="win-screen" class="screen hidden">
-        <div class="screen-content">
-            <h2 class="win-title">MISSION<br><span class="title-accent">COMPLETE</span></h2>
-            <p class="win-subtitle">The galaxy is safe... for now</p>
-            <div class="final-stats">
-                <div class="stat">
-                    <span class="stat-label">Final Score</span>
-                    <span class="stat-value" id="win-score">0</span>
-                </div>
-            </div>
-            <input type="text" id="win-player-name" class="name-input" placeholder="Enter your callsign" maxlength="12">
-            <button id="win-save-btn" class="btn btn-secondary">SAVE SCORE</button>
-            <button id="win-restart-btn" class="btn btn-primary">
-                <span>PLAY AGAIN</span>
-                <div class="btn-glow"></div>
-            </button>
-        </div>
-    </div>
+<span class="comment">// Response</span>
+{
+  <span class="key">"results"</span>: [
+    { <span class="key">"text"</span>: <span class="str">"msg1"</span>, <span class="key">"label"</span>: <span class="str">"SAFE"</span>, <span class="key">"confidence"</span>: <span class="str">"95%"</span> },
+    { <span class="key">"text"</span>: <span class="str">"msg2"</span>, <span class="key">"label"</span>: <span class="str">"DANGER"</span>, <span class="key">"confidence"</span>: <span class="str">"88%"</span> }
+  ],
+  <span class="key">"total"</span>: <span class="val">2</span>
+}</div>
+      </div>
 
-    <!-- Leaderboard Modal -->
-    <div id="leaderboard-modal" class="screen hidden">
-        <div class="screen-content leaderboard-content">
-            <h2 class="leaderboard-title">TOP <span class="title-accent">PILOTS</span></h2>
-            <div id="leaderboard-list"></div>
-            <button id="close-leaderboard-btn" class="btn btn-secondary">CLOSE</button>
-        </div>
+      <!-- JS Fetch example -->
+      <div>
+        <div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--text2)">JavaScript Fetch Example</div>
+        <div class="code-block">
+<span class="comment">// How this frontend calls the Flask API</span>
+const response = await fetch(<span class="str">"http://localhost:8080/api/predict"</span>, {
+  method: <span class="str">"POST"</span>,
+  headers: { <span class="str">"Content-Type"</span>: <span class="str">"application/json"</span> },
+  body: JSON.stringify({
+    text: <span class="str">"your message here"</span>,
+    platform: <span class="str">"Instagram"</span>
+  })
+});
+const data = await response.json();
+console.log(data.label, data.confidence_pct);</div>
+      </div>
     </div>
+  </div>
 
-    <!-- Pause Indicator -->
-    <div id="pause-indicator" class="hidden">
-        <span>PAUSED</span>
-    </div>
+</div>
 
-    <script src="game.js"></script>
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Config ──
+const API_BASE = "http://localhost:8080";
+
+const EXAMPLES = [
+  "Great presentation today! You explained the concept really clearly.",
+  "lol that was cringe, better luck next time I guess",
+  "nobody wants you in the group. everyone thinks you're annoying and weird.",
+  "I know where you live. You better watch yourself. Everyone hates you and you're worthless."
+];
+
+// ── On load: check API health ──
+window.addEventListener('load', checkHealth);
+
+async function checkHealth() {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = 'dot yellow';
+  txt.textContent = 'Connecting...';
+  try {
+    const res = await fetch(`${API_BASE}/api/health`, { signal: AbortSignal.timeout(3000) });
+    const d = await res.json();
+    dot.className = 'dot green';
+    txt.textContent = `API Online · Model: ${d.model}`;
+    showToast('✅ Flask API connected', 's');
+  } catch {
+    dot.className = 'dot red';
+    txt.textContent = 'API Offline — start Flask server';
+    showToast('⚠️ Flask server not running on :5000', 'e');
+  }
+}
+
+// ── Helpers ──
+function updateCount() {
+  const v = document.getElementById('msgInput').value;
+  document.getElementById('charCount').textContent = `${v.length} / 2000`;
+}
+
+function selectChip(el) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function loadEx(i) {
+  document.getElementById('msgInput').value = EXAMPLES[i];
+  updateCount();
+}
+
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+function getPlatform() {
+  return document.querySelector('.chip.active')?.textContent?.trim() || 'Unknown';
+}
+
+// ── Single Analyze ──
+async function analyze() {
+  const text = document.getElementById('msgInput').value.trim();
+  if (!text) { showToast('⚠️ Please enter a message', 'w'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ ANALYZING...';
+
+  const box = document.getElementById('resultBox');
+  box.innerHTML = `<div class="loading"><div class="spinner"></div><div class="loading-text">Sending to Flask API...</div></div>`;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/predict`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, platform: getPlatform() })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+
+    const d = await res.json();
+    renderResult(d, box);
+
+  } catch (err) {
+    box.innerHTML = `<div class="error-box">❌ <strong>Error:</strong> ${err.message}<br><small style="color:var(--text3)">Is Flask running? Try: python app.py</small></div>`;
+    showToast('❌ API Error: ' + err.message, 'e');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔍 ANALYZE MESSAGE';
+}
+
+// ── Render Result ──
+function renderResult(d, box) {
+  const cfg = {
+    SAFE:    { cls:'safe',    icon:'✅', title:'Safe Message' },
+    WARNING: { cls:'warning', icon:'⚠️', title:'Potential Bullying' },
+    DANGER:  { cls:'danger',  icon:'🚨', title:'Cyberbullying Detected' }
+  };
+  const c = cfg[d.label] || cfg['SAFE'];
+  const catCls = d.label === 'DANGER' ? 'cat-danger' : d.label === 'WARNING' ? 'cat-warn' : 'cat-safe';
+  const cats = (d.categories||['Clean']).map(x => `<span class="cat ${catCls}">${x}</span>`).join('');
+
+  // Compute mock sub-scores from confidence
+  const conf = Math.round((d.confidence||0.8)*100);
+  const scores = [
+    { label:'Harassment',    val: d.label==='DANGER'?conf:d.label==='WARNING'?Math.round(conf*0.7):10 },
+    { label:'Threats',       val: d.label==='DANGER'?Math.round(conf*0.9):d.label==='WARNING'?20:5 },
+    { label:'Toxic Language',val: d.label==='DANGER'?Math.round(conf*0.8):d.label==='WARNING'?Math.round(conf*0.6):8 },
+    { label:'Offensive',     val: d.label==='DANGER'?Math.round(conf*0.85):d.label==='WARNING'?Math.round(conf*0.5):12 }
+  ];
+  const scoreColor = (v) => v>60?'var(--danger)':v>30?'var(--warn)':'var(--safe)';
+  const scoresHtml = scores.map(s=>`
+    <div class="score-row">
+      <span class="score-label">${s.label}</span>
+      <div class="score-bar"><div class="score-fill" style="width:0%;background:${scoreColor(s.val)}" data-w="${s.val}"></div></div>
+      <span class="score-val" style="color:${scoreColor(s.val)}">${s.val}%</span>
+    </div>`).join('');
+
+  const actionBtns = d.label !== 'SAFE' ? `
+    <div class="action-btns">
+      <button class="abtn abtn-red" onclick="showToast('🚨 Moderator alerted!','e')">🚨 Alert Moderator</button>
+      <button class="abtn abtn-yellow" onclick="showToast('👨‍👩‍👧 Parent notified!','w')">👨‍👩‍👧 Notify Parent</button>
+      <button class="abtn abtn-gray" onclick="clearResult()">🗑️ Clear</button>
+    </div>` : `<div class="action-btns"><button class="abtn abtn-gray" onclick="clearResult()">🗑️ Clear</button></div>`;
+
+  box.innerHTML = `
+    <div class="verdict ${c.cls}">
+      <span class="verdict-icon">${c.icon}</span>
+      <div class="verdict-body">
+        <div class="verdict-title">${c.title}</div>
+        <div class="verdict-conf">Confidence: ${d.confidence_pct} · Source: ${d.source} · Platform: ${d.platform}</div>
+        <div class="cats">${cats}</div>
+        <div class="verdict-action">${d.action}</div>
+        <div class="scores" style="margin-top:14px">${scoresHtml}</div>
+        ${actionBtns}
+      </div>
+    </div>`;
+
+  // Animate bars
+  setTimeout(() => {
+    box.querySelectorAll('.score-fill').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 100);
+
+  if (d.label==='DANGER') showToast('🚨 Threat detected! Action required', 'e');
+  else if (d.label==='WARNING') showToast('⚠️ Possible harassment detected', 'w');
+  else showToast('✅ Message is safe', 's');
+}
+
+function clearResult() {
+  document.getElementById('msgInput').value = '';
+  updateCount();
+  document.getElementById('resultBox').innerHTML = '<div class="placeholder">🛡️ Enter a message above and click Analyze</div>';
+}
+
+// ── Batch Analyze ──
+async function batchAnalyze() {
+  const raw = document.getElementById('batchInput').value.trim();
+  if (!raw) { showToast('⚠️ Enter messages first', 'w'); return; }
+
+  const messages = raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0).slice(0,50);
+
+  const batchResults = document.getElementById('batchResults');
+  const batchOutput = document.getElementById('batchOutput');
+  batchResults.style.display = 'block';
+  batchOutput.innerHTML = `<div class="loading"><div class="spinner"></div><div class="loading-text">Analyzing ${messages.length} messages...</div></div>`;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/batch`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ messages })
+    });
+    const d = await res.json();
+    const icons = {SAFE:'✅',WARNING:'⚠️',DANGER:'🚨'};
+    const colors = {SAFE:'var(--safe)',WARNING:'var(--warn)',DANGER:'var(--danger)'};
+    batchOutput.innerHTML = d.results.map((r,i)=>`
+      <div style="display:flex;align-items:center;gap:12px;padding:10px;border-bottom:1px solid var(--border);font-size:13px">
+        <span style="color:var(--text3);font-family:'Space Mono',monospace;width:24px">${i+1}</span>
+        <span style="flex:1;color:var(--text2)">${r.text}</span>
+        <span style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:${colors[r.label]}">${icons[r.label]} ${r.label}</span>
+        <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text3)">${r.confidence}</span>
+      </div>`).join('');
+    showToast(`✅ ${d.total} messages analyzed`, 's');
+  } catch(err) {
+    batchOutput.innerHTML = `<div class="error-box">❌ ${err.message}</div>`;
+  }
+}
+
+// ── Toast ──
+function showToast(msg, type='s') {
+  const t = document.getElementById('toast');
+  t.className = `toast ${type} show`;
+  t.textContent = msg;
+  setTimeout(()=>t.classList.remove('show'), 3500);
+}
+
+// Allow Enter key to submit
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key==='Enter') analyze();
+});
+</script>
 </body>
-
 </html>
