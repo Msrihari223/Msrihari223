@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Nebula Striker — Space Shooting Game</title>
+    <meta name="description"
+        content="A thrilling browser-based space shooting game with multiple levels, enemy types, and power-ups.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- HUD Overlay -->
+    <div id="hud" class="hidden">
+        <div id="hud-left">
+            <div class="hud-item" id="score-display">
+                <span class="hud-label">SCORE</span>
+                <span class="hud-value" id="score-value">0</span>
+            </div>
+            <div class="hud-item" id="level-display">
+                <span class="hud-label">LEVEL</span>
+                <span class="hud-value" id="level-value">1</span>
+            </div>
+        </div>
+        <div id="hud-center">
+            <div id="health-container">
+                <span class="hud-label">SHIELD</span>
+                <div id="health-bar-outer">
+                    <div id="health-bar-inner"></div>
+                    <span id="health-text">100%</span>
+                </div>
+            </div>
+        </div>
+        <div id="hud-right">
+            <div class="hud-item" id="enemies-display">
+                <span class="hud-label">ENEMIES</span>
+                <span class="hud-value" id="enemies-value">0</span>
+            </div>
+            <div class="hud-item" id="powerup-display" class="hidden">
+                <span class="hud-label">POWER-UP</span>
+                <span class="hud-value" id="powerup-value">—</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen">
+        <div class="screen-content">
+            <h1 class="game-title">NEBULA<br><span class="title-accent">STRIKER</span></h1>
+            <p class="game-subtitle">Defend the galaxy from alien invasion</p>
+            <div class="instructions">
+                <div class="instruction-item">
+                    <span class="key">MOUSE / TOUCH</span>
+                    <span>Move ship</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="key">CLICK / TAP</span>
+                    <span>Shoot</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="key">DESTROY</span>
+                    <span>All enemies to advance</span>
+                </div>
+            </div>
+            <button id="start-btn" class="btn btn-primary">
+                <span>LAUNCH MISSION</span>
+                <div class="btn-glow"></div>
+            </button>
+            <button id="leaderboard-btn" class="btn btn-secondary">LEADERBOARD</button>
+        </div>
+    </div>
+
+    <!-- Level Intro Screen -->
+    <div id="level-screen" class="screen hidden">
+        <div class="screen-content">
+            <h2 class="level-title" id="level-title">LEVEL 1</h2>
+            <p class="level-subtitle" id="level-subtitle">Incoming hostiles detected</p>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="screen hidden">
+        <div class="screen-content">
+            <h2 class="gameover-title">MISSION<br><span class="title-accent">FAILED</span></h2>
+            <div class="final-stats">
+                <div class="stat">
+                    <span class="stat-label">Final Score</span>
+                    <span class="stat-value" id="final-score">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Level Reached</span>
+                    <span class="stat-value" id="final-level">1</span>
+                </div>
+            </div>
+            <input type="text" id="player-name" class="name-input" placeholder="Enter your callsign" maxlength="12">
+            <button id="save-score-btn" class="btn btn-secondary">SAVE SCORE</button>
+            <button id="restart-btn" class="btn btn-primary">
+                <span>RETRY MISSION</span>
+                <div class="btn-glow"></div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Win Screen -->
+    <div id="win-screen" class="screen hidden">
+        <div class="screen-content">
+            <h2 class="win-title">MISSION<br><span class="title-accent">COMPLETE</span></h2>
+            <p class="win-subtitle">The galaxy is safe... for now</p>
+            <div class="final-stats">
+                <div class="stat">
+                    <span class="stat-label">Final Score</span>
+                    <span class="stat-value" id="win-score">0</span>
+                </div>
+            </div>
+            <input type="text" id="win-player-name" class="name-input" placeholder="Enter your callsign" maxlength="12">
+            <button id="win-save-btn" class="btn btn-secondary">SAVE SCORE</button>
+            <button id="win-restart-btn" class="btn btn-primary">
+                <span>PLAY AGAIN</span>
+                <div class="btn-glow"></div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="screen hidden">
+        <div class="screen-content leaderboard-content">
+            <h2 class="leaderboard-title">TOP <span class="title-accent">PILOTS</span></h2>
+            <div id="leaderboard-list"></div>
+            <button id="close-leaderboard-btn" class="btn btn-secondary">CLOSE</button>
+        </div>
+    </div>
+
+    <!-- Pause Indicator -->
+    <div id="pause-indicator" class="hidden">
+        <span>PAUSED</span>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
